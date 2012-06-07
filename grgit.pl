@@ -6,6 +6,7 @@ use Readonly;
 use Carp;
 use LWP::Simple qw{get};
 use YAML;
+use Sys::Hostname;
 #use Data::Dumper;
 
 Readonly my $GIT_SERVER     => 'git.greptilian.com';
@@ -18,6 +19,9 @@ Readonly my $DOTDOT         => q{..};
 Readonly my $FILES_NON_DOT  => q{*};
 Readonly my $DESCRIPTIONS   => "http://$GIT_SERVER/?p=wiki.git;a=blob_plain;f=greptilian.com/git/repos.mdwn;hb=HEAD";
 Readonly my $GIT_CMD        => $ARGV[0] || 'pull';
+
+my $hostname = hostname;
+my $on_server = $hostname eq 'server1.greptilian.com' ? 1 : 0;
 
 chdir($LOCAL_GIT_DIR) or croak "Couldn't cd to $LOCAL_GIT_DIR";
 
@@ -43,7 +47,19 @@ for my $repo ( sort keys %{$proj_descriptions} ) {
 }
 
 for my $project_bare (sort @projects) {
-    carp "No description for $project_bare at $DESCRIPTIONS" unless ${$proj_descriptions}{$project_bare};
+    my $desc_wiki = ${$proj_descriptions}{$project_bare};
+    if ($desc_wiki) {
+        if ($on_server) {
+            my $desc_local = "$PROJECT_DIR/$project_bare/description";
+            open(my $fh, ">", "$desc_local") or die "cannot open $desc_local: $!";
+            print $fh $desc_wiki;
+            close($fh) || warn "close failed: $!";
+
+        }
+    }
+    else {
+        carp "No description for $project_bare at $DESCRIPTIONS"
+    }
     my ($project_local) = $project_bare =~ /^(.*?)[.]git/;
     if ( chdir($project_local) ) {
         printf( '%-30s', "$project_local... " );
