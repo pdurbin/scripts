@@ -17,6 +17,7 @@ Readonly my $GIT_CLONE_PATH => "$GIT_SERVER:$PROJECT_DIR";
 Readonly my $DOTDOT         => q{..};
 Readonly my $FILES_NON_DOT  => q{*};
 Readonly my $DESCRIPTIONS   => "http://$GIT_SERVER/?p=wiki.git;a=blob_plain;f=greptilian.com/git/repos.mdwn;hb=HEAD";
+Readonly my $GIT_CMD        => $ARGV[0] || 'pull';
 
 chdir($LOCAL_GIT_DIR) or croak "Couldn't cd to $LOCAL_GIT_DIR";
 
@@ -46,7 +47,7 @@ for my $project_bare (sort @projects) {
     my ($project_local) = $project_bare =~ /^(.*?)[.]git/;
     if ( chdir($project_local) ) {
         printf( '%-30s', "$project_local... " );
-        system('git pull');
+        system("git $GIT_CMD");
         chdir($DOTDOT);
     }
     else {
