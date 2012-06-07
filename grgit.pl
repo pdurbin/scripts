@@ -43,22 +43,22 @@ if ( !$descriptions_yaml ) {
 my $proj_descriptions = Load($descriptions_yaml);
 
 for my $repo ( sort keys %{$proj_descriptions} ) {
-    carp "No description for $repo at $DESCRIPTIONS" unless ($repo ~~ @projects);
+    carp "No description for $repo at $DESCRIPTIONS" unless ( $repo ~~ @projects );
 }
 
-for my $project_bare (sort @projects) {
+for my $project_bare ( sort @projects ) {
     my $desc_wiki = ${$proj_descriptions}{$project_bare};
     if ($desc_wiki) {
         if ($on_server) {
             my $desc_local = "$PROJECT_DIR/$project_bare/description";
-            open(my $fh, ">", "$desc_local") or die "cannot open $desc_local: $!";
+            open( my $fh, ">", "$desc_local" ) or die "cannot open $desc_local: $!";
             print $fh $desc_wiki;
             close($fh) || warn "close failed: $!";
 
         }
     }
     else {
-        carp "No description for $project_bare at $DESCRIPTIONS"
+        carp "No description for $project_bare at $DESCRIPTIONS";
     }
     my ($project_local) = $project_bare =~ /^(.*?)[.]git/;
     if ( chdir($project_local) ) {
@@ -67,7 +67,6 @@ for my $project_bare (sort @projects) {
         chdir($DOTDOT);
     }
     else {
-        print
-"Could not cd to $project_local. Clone with:\ngit clone $GIT_USER\@$GIT_CLONE_PATH/$project_bare\n";
+        print "Could not cd to $project_local. Clone with:\ngit clone $GIT_USER\@$GIT_CLONE_PATH/$project_bare\n";
     }
 }
