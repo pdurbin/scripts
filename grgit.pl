@@ -62,7 +62,7 @@ for my $project_bare ( sort @projects ) {
     }
     my ($project_local) = $project_bare =~ /^(.*?)[.]git/;
     if ( chdir($project_local) ) {
-        printf( '%-30s', "$project_local... " );
+        printf( '%-31s', "$project_local... " );
         system("git $GIT_CMD");
         chdir($DOTDOT);
     }
