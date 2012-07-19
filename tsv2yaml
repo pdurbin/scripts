@@ -1,0 +1,36 @@
+#!/usr/bin/perl
+use strict;
+use warnings FATAL => qw(uninitialized);
+use Text::CSV;
+use Data::Dumper;
+use YAML;
+use Carp;
+#use JSON;
+
+my $csv = Text::CSV->new( { sep_char => "\t" } ) or croak 'Cannot use file: ' . Text::CSV->error_diag();
+
+my @headers;
+
+while (<>) {
+    my $result = $csv->parse($_);
+    @headers = $csv->fields();
+    last;
+}
+
+my $data;
+
+while (<>) {
+    my $result = $csv->parse($_);
+    my @fields = $csv->fields();
+    my $count  = 0;
+    for my $field (@fields) {
+        ${$data}{ $fields[0] }{ $headers[$count] } = $field;
+        $count++;
+    }
+}
+
+print Dump $data;
+
+#my $json      = new JSON;
+#my $json_text = $json->pretty->encode($data);
+#print $json_text;
