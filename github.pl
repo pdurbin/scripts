@@ -25,6 +25,8 @@ my $project_list_dd = from_json($project_list_json);
 
 for my $repo ( @{$project_list_dd} ) {
     my ($project_local) = $repo->{ssh_url} =~ qr{^git[@]github[.]com:pdurbin/(.*)[.]git$}ms;
+    next if $project_local eq 'todo.txt-touch';
+    next if $project_local eq 'rpms';
     if ( chdir $project_local ) {
         printf '%-31s', "$project_local... ";
         system "git $GIT_CMD";
