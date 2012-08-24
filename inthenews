@@ -1,0 +1,53 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use MIME::Lite;
+use HTML::TreeBuilder;
+use LWP::Simple qw(get $ua);
+use YAML;
+use Data::Dumper;
+#binmode STDOUT, ":utf8";
+
+# Wikipedia blocks LWP::Simple's default User-Agent
+# http://stackoverflow.com/questions/24546/why-cant-i-fetch-wikipedia-pages-with-lwpsimple
+$ua->agent('Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.0.18) Gecko/2010020219 Firefox/3.0.18');
+
+my $url = 'http://en.wikipedia.org/wiki/Template:In_the_news';
+
+#my $file = '/tmp/Template:In_the_news';
+#my $tree = HTML::TreeBuilder->new->parse_file($file);
+
+my $content = get("$url") or die "Couldn't download $url";
+
+my $tree = HTML::TreeBuilder->new->parse($content)->eof;
+
+my $body_content = $tree->look_down( id => 'mw-content-text' )->look_down( _tag => 'ul' );
+
+my $data;
+
+for my $story ( $body_content->look_down( _tag => 'li' ) ) {
+    my $as_text = $story->as_trimmed_text;
+    push( @$data, "$as_text" );
+}
+
+my $html;
+
+for my $story ( $body_content->look_down( _tag => 'ul' ) ) {
+    my $as_html = $story->as_HTML;
+    $html .= $as_html;
+}
+
+$tree->delete();
+
+$html =~ s{(<a href=")}{$1http://en.wikipedia.org}g;
+
+my $msg = MIME::Lite->new(
+    From       => '"greptilian.com" <philipdurbin@gmail.com>',
+    'Reply-To' => 'philipdurbin@gmail.com',
+    To         => 'philipdurbin@gmail.com',
+    Subject    => 'Wikipedia - In the News',
+    Type       => 'text/html',
+    Data       => $html,
+);
+
+$msg->send();
