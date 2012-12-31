@@ -1,0 +1,105 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use YAML qw{LoadFile Load Dump};
+use 5.010;
+use Data::Dumper;
+use Getopt::Long;
+
+my $by_tag;
+my $by_tag_parents;
+my $by_group;
+my $by_group_parents;
+my $parents;
+my $result = GetOptions( "parents" => \$parents );
+my $yaml;
+
+if (@ARGV) {
+    $yaml = LoadFile(@ARGV);
+}
+else {
+    my $contents = do { local $/; <DATA> };
+    $yaml = Load($contents);
+}
+
+while ( my $hash = shift @$yaml ) {
+    my ( $kid, $data ) = each %$hash;
+    my @tags   = $data->{tags}   ? @{ $data->{tags} }   : ();
+    my @groups = $data->{groups} ? @{ $data->{groups} } : ();
+    for my $tag ( sort @tags ) {
+        push( @{ $$by_tag{$tag} }, $kid . ' (' . join( '; ', @groups ) . ')' );
+        if ($parents) {
+            while ( my ( $parent, $email ) = each %{ $data->{parents} } ) {
+                push( @{ $$by_tag_parents{$tag} }, "\"$parent\" <$email>" );
+            }
+        }
+    }
+    for my $group ( sort @groups ) {
+        push( @{ $$by_group{$group} }, $kid );
+        if ($parents) {
+            while ( my ( $parent, $email ) = each %{ $data->{parents} } ) {
+                push( @{ $$by_group_parents{$group} }, "\"$parent\" <$email>" );
+            }
+        }
+    }
+    my $parent_string = '';
+    if ($parents) {
+
+        my @parent_array;
+        while ( my ( $parent, $email ) = each %{ $data->{parents} } ) {
+            push( @parent_array, "\"$parent\" <$email>" );
+        }
+        $parent_string = join( ', ', @parent_array );
+
+    }
+    printf( "%s (%s) %s%s\n",
+        $kid,
+        join( ", ", @groups ),
+        @tags ? "... " . join( ", ", @tags ) : "",
+        $parent_string ? " - parents: $parent_string" : '' );
+
+}
+say '---';
+while ( my ( $group, $kids ) = each %$by_group ) {
+    print "$group: ", join( ', ', sort @$kids );
+    print "\n";
+}
+if ($parents) {
+    say '---';
+}
+while ( my ( $group, $parents ) = each %$by_group_parents ) {
+    print "$group parents:\n", join( ', ', sort @$parents );
+    print "\n\n";
+}
+print Dump $by_tag;
+if ($parents) {
+    say '---';
+}
+while ( my ( $tag, $parents ) = each %$by_tag_parents ) {
+    print "$tag parents:\n", join( ', ', sort @$parents );
+    print "\n\n";
+}
+__DATA__
+- Milhouse:
+    groups:
+      - Springfield Elementary
+    parents:
+      Kirk: kirk@example.com
+      Luann: luann@example.com
+    tags:
+      - Comic-Con
+- Ralph:
+    groups:
+      - Springfield Elementary
+      - spelling bee
+    parents:
+      Clancy: wiggum@example.com
+      Sarah: sarah@example.com
+- Uter:
+    groups:
+      - Springfield Elementary
+    parents:
+      Tobias: tobias@example.com
+      Kathryn: kathryn@example.com
+    tags:
+      - chocolate
