@@ -15,5 +15,5 @@ die "Couldn't download $issues_json " unless defined $content;
 my $data = from_json($content);
 
 for my $i ( @{ $$data{issues} } ) {
-    printf( "%s %s %s\n - %s\n", $i->{fixed_version}{name}, $i->{id}, $i->{subject}, "$base_url/issues/$i->{id}", );
+    printf( "%s %s %s %s\n - %s\n", $i->{fixed_version}{name}, $i->{done_ratio}, $i->{id}, $i->{subject}, "$base_url/issues/$i->{id}", );
 }
