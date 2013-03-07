@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!/usr/bin/perl
 use strict;
 use warnings;
 use LWP::Simple;
@@ -9,11 +9,19 @@ my $pdurbin     = 4;
 my $base_url    = 'https://redmine.hmdc.harvard.edu';
 my $issues_json = "$base_url/issues.json?assigned_to_id=$pdurbin";
 
-my $content     = get($issues_json);
+my $content = get($issues_json);
 die "Couldn't download $issues_json " unless defined $content;
 
 my $data = from_json($content);
 
-for my $i ( @{ $$data{issues} } ) {
-    printf( "%3s %2s %4s %s\n - %s\n", $i->{fixed_version}{name}, $i->{done_ratio}, $i->{id}, $i->{subject}, "$base_url/issues/$i->{id}", );
+for my $i ( sort by_release @{ $$data{issues} } ) {
+    printf(
+        "%3s %2s %4s %s\n - %s\n",
+        $i->{fixed_version}{name},
+        $i->{done_ratio}, $i->{id}, $i->{subject}, "$base_url/issues/$i->{id}",
+    );
+}
+
+sub by_release {
+    $$a{fixed_version}{name} <=> $$b{fixed_version}{name};
 }
