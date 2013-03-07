@@ -5,23 +5,42 @@ use LWP::Simple;
 use JSON;
 use Data::Dumper;
 
-my $pdurbin     = 4;
+my $pdurbin = 4;
+my $leonid  = 11;
+my $user;
+$user = $pdurbin;
+#$user = $leonid;
 my $base_url    = 'https://redmine.hmdc.harvard.edu';
-my $issues_json = "$base_url/issues.json?assigned_to_id=$pdurbin";
+my $issues_json = "$base_url/issues.json?assigned_to_id=$user";
 
 my $content = get($issues_json);
 die "Couldn't download $issues_json " unless defined $content;
 
 my $data = from_json($content);
 
-for my $i ( sort by_release @{ $$data{issues} } ) {
+for my $i ( sort by_priority @{ $$data{issues} } ) {
     printf(
-        "%3s %2s %4s %s\n - %s\n",
-        $i->{fixed_version}{name},
-        $i->{done_ratio}, $i->{id}, $i->{subject}, "$base_url/issues/$i->{id}",
+        @ARGV && $ARGV[0] eq '-v'
+        ? "%s %s (%s)\n - %s %s, %s %s, %s\n - %s\n\n"
+        : "%s %s (%s)\n",
+
+        "#$i->{id}",
+        $i->{subject},
+        $i->{fixed_version}{name} || '?.?',
+
+        "$i->{priority}{name} priority",
+        lc( $i->{tracker}{name} || '?' ),
+        lc("$i->{status}{name} for"),
+        $i->{fixed_version}{name} || '?.?',
+        "$i->{done_ratio}% done",
+        "$base_url/issues/$i->{id}",
     );
 }
 
 sub by_release {
     $$a{fixed_version}{name} <=> $$b{fixed_version}{name};
+}
+
+sub by_priority {
+    $$b{priority}{id} <=> $$a{priority}{id};
 }
