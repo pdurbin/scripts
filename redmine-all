@@ -18,12 +18,13 @@ for my $offset (@offsets) {
     for my $i ( sort by_priority @{ $$data{issues} } ) {
         printf(
             @ARGV && $ARGV[0] eq '-v'
-            ? "%s %s (%s)\n - %s %s, %s %s, %s\n - %s\n\n"
-            : "%s %s (%s)\n",
+            ? "%s %s (%s) %s\n - %s %s, %s %s, %s\n - %s\n\n"
+            : "%s %s (%s) %s\n",
 
             $i->{id},
             $i->{subject},
             $i->{fixed_version}{name} || '?.?',
+            $i->{assigned_to}{name}   || 'Nobody',
 
             "$i->{priority}{name} priority",
             lc( $i->{tracker}{name} || '?' ),
