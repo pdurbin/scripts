@@ -1,0 +1,45 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use LWP::Simple;
+use JSON;
+
+# FIXME: don't just hard code this...
+my @offsets = qw{0 100 200 300};
+for my $offset (@offsets) {
+    my $base_url    = 'https://redmine.hmdc.harvard.edu';
+    my $issues_json = "$base_url/issues.json?project_id=1&limit=100&offset=$offset";
+
+    my $content = get($issues_json);
+    die "Couldn't download $issues_json " unless defined $content;
+
+    my $data = from_json($content);
+
+    for my $i ( sort by_priority @{ $$data{issues} } ) {
+        printf(
+            @ARGV && $ARGV[0] eq '-v'
+            ? "%s %s (%s)\n - %s %s, %s %s, %s\n - %s\n\n"
+            : "%s %s (%s)\n",
+
+            $i->{id},
+            $i->{subject},
+            $i->{fixed_version}{name} || '?.?',
+
+            "$i->{priority}{name} priority",
+            lc( $i->{tracker}{name} || '?' ),
+            lc("$i->{status}{name} for"),
+            $i->{fixed_version}{name} || '?.?',
+            "$i->{done_ratio}% done",
+            "$base_url/issues/$i->{id}",
+        );
+    }
+
+}
+
+sub by_release {
+    $$a{fixed_version}{name} <=> $$b{fixed_version}{name};
+}
+
+sub by_priority {
+    $$b{priority}{id} <=> $$a{priority}{id};
+}
