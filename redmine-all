@@ -1,50 +1,48 @@
-#!/usr/bin/perl
-use strict;
-use warnings;
-use LWP::Simple;
-use JSON;
+#!/usr/bin/python
+"""
+Dump DVN Redmine tickets
+"""
+__version__ = "0.0.1"
+import urllib2
+import json
+import optparse
+
+parser = optparse.OptionParser(version=__version__, description=__doc__)
+parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
+                help="verbose output")
+
+options, args = parser.parse_args()
+
+base_url = 'https://redmine.hmdc.harvard.edu'
 
 # FIXME: don't just hard code this...
-my @offsets = qw{0 100 200 300};
-for my $offset (@offsets) {
-    my $base_url    = 'https://redmine.hmdc.harvard.edu';
-    my $issues_json = "$base_url/issues.json?project_id=1&limit=100&offset=$offset";
-
-    my $content = get($issues_json);
-    die "Couldn't download $issues_json " unless defined $content;
-
-    my $data = from_json($content);
-
-    for my $i ( sort by_id @{ $$data{issues} } ) {
-        printf(
-            @ARGV && $ARGV[0] eq '-v'
-            ? "%s %s (%s) %s\n - %s %s, %s %s, %s\n - %s\n\n"
-            : "%s %s (%s) %s\n",
-
-            $i->{id},
-            $i->{subject},
-            $i->{fixed_version}{name} || '?.?',
-            $i->{assigned_to}{name}   || 'Nobody',
-
-            "$i->{priority}{name} priority",
-            lc( $i->{tracker}{name} || '?' ),
-            lc("$i->{status}{name} for"),
-            $i->{fixed_version}{name} || '?.?',
-            "$i->{done_ratio}% done",
-            "$base_url/issues/$i->{id}",
-        );
-    }
-
-}
-
-sub by_release {
-    $$a{fixed_version}{name} <=> $$b{fixed_version}{name};
-}
-
-sub by_priority {
-    $$b{priority}{id} <=> $$a{priority}{id};
-}
-
-sub by_id {
-    $$b{id} <=> $$a{id};
-}
+for i in range(0, 400, 100):
+    url = base_url+'/issues.json?project_id=1&limit=100&offset='+str(i)
+    content = urllib2.urlopen(url)
+    data = json.load(content)
+    for i in data['issues']:
+        id = i['id']
+        subject = i['subject']
+        try:
+            release = i['fixed_version']['name']
+        except KeyError:
+            release = '?.?'
+        try:
+            assigned = i['assigned_to']['name']
+        except KeyError:
+            assigned = 'Nobody'
+        priority = i['priority']['name']
+        try:
+            tracker = i['tracker']['name']
+        except KeyError:
+            assigned = '?'
+        status = i['status']['name']
+        done = i['done_ratio']
+        link = base_url+'/issues/'+str(id)
+        if options.verbose:
+            print id, subject, '('+release+')', assigned
+            print " -", priority, 'priority', tracker.lower()+',', status.lower(), 'for', release+',', str(done)+"%", 'done'
+            print " -", link
+            print
+        else:
+            print id, subject, '('+release+')', assigned
