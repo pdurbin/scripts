@@ -23,18 +23,18 @@ for i in range(0, 400, 100):
     for i in data['issues']:
         id = i['id']
         subject = i['subject']
-        try:
+        if 'fixed_version' in i.keys():
             release = i['fixed_version']['name']
-        except KeyError:
+        else:
             release = '?.?'
-        try:
+        if 'assigned_to' in i.keys():
             assigned = i['assigned_to']['name']
-        except KeyError:
+        else:
             assigned = 'Nobody'
         priority = i['priority']['name']
-        try:
+        if 'tracker' in i.keys():
             tracker = i['tracker']['name']
-        except KeyError:
+        else:
             assigned = '?'
         status = i['status']['name']
         done = i['done_ratio']
