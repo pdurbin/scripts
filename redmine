@@ -18,7 +18,7 @@ die "Couldn't download $issues_json " unless defined $content;
 
 my $data = from_json($content);
 
-for my $i ( sort by_priority @{ $$data{issues} } ) {
+for my $i ( sort by_release_then_priority @{ $$data{issues} } ) {
     printf(
         @ARGV && $ARGV[0] eq '-v'
         ? "%s %s (%s)\n - %s %s, %s %s, %s\n - %s\n\n"
@@ -44,3 +44,9 @@ sub by_release {
 sub by_priority {
     $$b{priority}{id} <=> $$a{priority}{id};
 }
+
+sub by_release_then_priority {
+    $$a{fixed_version}{name} <=> $$b{fixed_version}{name}
+      || $$b{priority}{id} <=> $$a{priority}{id};
+}
+
