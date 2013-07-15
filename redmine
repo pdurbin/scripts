@@ -38,7 +38,7 @@ for my $i ( sort by_release_then_priority @{ $$data{issues} } ) {
 }
 
 sub by_release {
-    $$a{fixed_version}{name} <=> $$b{fixed_version}{name};
+    $$a{fixed_version}{name} cmp $$b{fixed_version}{name};
 }
 
 sub by_priority {
@@ -46,7 +46,7 @@ sub by_priority {
 }
 
 sub by_release_then_priority {
-    $$a{fixed_version}{name} <=> $$b{fixed_version}{name}
+    $$a{fixed_version}{name} cmp $$b{fixed_version}{name}
       || $$b{priority}{id} <=> $$a{priority}{id};
 }
 
