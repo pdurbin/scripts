@@ -11,7 +11,7 @@ my $user;
 $user = $pdurbin;
 #$user = $leonid;
 my $base_url    = 'https://redmine.hmdc.harvard.edu';
-my $issues_json = "$base_url/issues.json?assigned_to_id=$user";
+my $issues_json = "$base_url/issues.json?limit=100&assigned_to_id=$user";
 
 my $content = get($issues_json);
 die "Couldn't download $issues_json " unless defined $content;
