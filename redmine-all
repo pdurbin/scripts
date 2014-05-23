@@ -40,9 +40,9 @@ for i in range(0, 400, 100):
         done = i['done_ratio']
         link = base_url+'/issues/'+str(id)
         if options.verbose:
-            print id, subject, '('+release+')', assigned
+            print id, subject.encode('utf-8'), '('+release+')', assigned
             print " -", priority, 'priority', tracker.lower()+',', status.lower(), 'for', release+',', str(done)+"%", 'done'
             print " -", link
             print
         else:
-            print id, subject, '('+release+')', assigned
+            print id, subject.encode('utf-8'), '('+release+')', assigned
