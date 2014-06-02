@@ -41,13 +41,17 @@ for i in range(0, last_offset, 100):
             tracker = i['tracker']['name']
         else:
             tracker = '?'
+        if 'category' in i.keys():
+            category = i['category']['name']
+        else:
+            category = '?'
         status = i['status']['name']
         done = i['done_ratio']
         link = base_url+'/issues/'+str(id)
         if options.verbose:
-            print id, subject.encode('utf-8'), '('+release+')', assigned
+            print id, subject.encode('utf-8'), '('+release+')', assigned, '('+category+')'
             print " -", priority, 'priority', tracker.lower()+',', status.lower(), 'for', release+',', str(done)+"%", 'done'
             print " -", link
             print
         else:
-            print id, subject.encode('utf-8'), '('+release+')', assigned
+            print id, subject.encode('utf-8'), '('+release+')', assigned, '('+category+')'
