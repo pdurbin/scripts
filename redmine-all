@@ -8,8 +8,8 @@ import json
 import optparse
 
 parser = optparse.OptionParser(version=__version__, description=__doc__)
-parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
-                help="verbose output")
+parser.add_option("-v", "--verbose", action="store_true", dest="verbose", help="verbose output")
+parser.add_option("-d", "--debug", action="store_true", dest="debug", help="debug")
 
 options, args = parser.parse_args()
 
@@ -22,9 +22,12 @@ data = json.load(content)
 last_offset = ((data['total_count'] / 100) + 1) * 100
 
 for i in range(0, last_offset, 100):
-    url = base_url+'/issues.json?project_id=1&limit=100&offset='+str(i)
+    url = base_url+'/issues.json?project_id=1&include=relations&limit=100&offset='+str(i)
     content = urllib2.urlopen(url)
     data = json.load(content)
+    if options.debug:
+        print json.dumps(data, indent=4)
+        break
     for i in data['issues']:
         id = i['id']
         subject = i['subject']
