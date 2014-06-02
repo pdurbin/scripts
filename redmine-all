@@ -40,7 +40,7 @@ for i in range(0, last_offset, 100):
         if 'tracker' in i.keys():
             tracker = i['tracker']['name']
         else:
-            assigned = '?'
+            tracker = '?'
         status = i['status']['name']
         done = i['done_ratio']
         link = base_url+'/issues/'+str(id)
