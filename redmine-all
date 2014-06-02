@@ -15,8 +15,13 @@ options, args = parser.parse_args()
 
 base_url = 'https://redmine.hmdc.harvard.edu'
 
-# FIXME: really don't just hard code this...
-for i in range(0, 700, 100):
+# figure out how many times to iterate
+url = base_url+'/issues.json?project_id=1&limit=1'
+content = urllib2.urlopen(url)
+data = json.load(content)
+last_offset = ((data['total_count'] / 100) + 1) * 100
+
+for i in range(0, last_offset, 100):
     url = base_url+'/issues.json?project_id=1&limit=100&offset='+str(i)
     content = urllib2.urlopen(url)
     data = json.load(content)
