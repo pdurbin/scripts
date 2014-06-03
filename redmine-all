@@ -10,6 +10,7 @@ import optparse
 parser = optparse.OptionParser(version=__version__, description=__doc__)
 parser.add_option("-v", "--verbose", action="store_true", dest="verbose", help="verbose output")
 parser.add_option("-d", "--debug", action="store_true", dest="debug", help="debug")
+parser.add_option("-o", "--oneline", action="store_true", dest="oneline", help="show all output on a single line")
 
 options, args = parser.parse_args()
 
@@ -56,5 +57,7 @@ for i in range(0, last_offset, 100):
             print " -", priority, 'priority', tracker.lower()+',', status.lower(), 'for', release+',', str(done)+"%", 'done'
             print " -", link
             print
+        if options.oneline:
+            print id, subject.encode('utf-8'), '('+release+')', assigned, '('+category+')', priority, 'priority', tracker.lower()+',', status.lower(), 'for', release+',', link
         else:
             print id, subject.encode('utf-8'), '('+release+')', assigned, '('+category+')'
