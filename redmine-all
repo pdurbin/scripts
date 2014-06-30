@@ -57,7 +57,7 @@ for i in range(0, last_offset, 100):
             print " -", priority, 'priority', tracker.lower()+',', status.lower(), 'for', release+',', str(done)+"%", 'done'
             print " -", link
             print
-        if options.oneline:
+        elif options.oneline:
             print id, subject.encode('utf-8'), '('+release+')', assigned, '('+category+')', priority, 'priority', tracker.lower()+',', status.lower(), 'for', release+',', link
         else:
             print id, subject.encode('utf-8'), '('+release+')', assigned, '('+category+')'
